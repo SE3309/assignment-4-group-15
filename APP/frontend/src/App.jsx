@@ -5,13 +5,14 @@ import viteLogo from '/vite.svg';
 import './App.css';
 import Register from './Components/Register'; //Register
 import Login from './Components/Login'; //Login
+import Start from './Components/Start'; //Start Page
 
 function App() {
   const [count, setCount] = useState(0);
 
   return (
     <Router>
-      <div>
+      {/* <div>
         <a href="https://vite.dev" target="_blank" rel="noopener noreferrer">
           <img src={viteLogo} className="logo" alt="Vite logo" />
         </a>
@@ -30,10 +31,11 @@ function App() {
         <p className="read-the-docs">
           Click on the Vite and React logos to learn more
         </p>
-      </div>
+      </div> */}
 
       {/* Routes*/}
       <Routes>
+        <Route path="/" element={<Start />} />
         <Route path="/Register" element={<Register />} />
         <Route path="/Login" element={<Login />} />
       </Routes>
