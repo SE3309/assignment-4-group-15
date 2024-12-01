@@ -12,7 +12,7 @@ const db = mysql.createConnection({
     port: 3306,
     user: 'root',
     password: '46319432Harry', //CHANGE
-    database: 'project' //CHANGE
+    database: 'marketplace' //CHANGE
 })
 db.connect((e) => {
     if (e) {
@@ -38,7 +38,7 @@ app.post('/register', (req, res) => {
     );
 });
 
-// login user 
+//login user 
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
   
@@ -52,16 +52,60 @@ app.post('/login', (req, res) => {
         }
         
         if (result.length > 0) {
-          // Send a success response with the user details (or just a message/token)
           res.status(200).json({ message: "Login successful", user: result[0] });
         } else {
-          // Wrong username or password
           res.status(401).json({ message: "Wrong username or password" });
         }
       }
     );
   });
 
-app.listen(3000, () =>{
+  //Import categories
+  app.get('/categories', (req, res) => {
+    db.query("SELECT categoryID, name FROM category", (error, results) => {
+      if (error) {
+        console.log(error);
+        return res.status(500).json({message: "database error", error});
+      }
+      res.status(200).json(results);
+    })
+  })
+
+  //Fetch top 5 highest rated listings for a category
+  app.get("/top-listings/:categoryID", (req, res) => {
+    const { categoryID } = req.params;
+    console.log("Received request for category:", categoryID);
+    db.query(
+    `
+    SELECT
+      l.listingID,
+      l.seller AS userID,
+      l.price,
+      AVG(r.rating) AS avgRating
+    FROM 
+      Listing l
+    JOIN 
+      review r ON l.listingID = r.listingID
+    WHERE 
+      l.categoryID = ?
+    GROUP BY
+      l.listingID
+    ORDER BY
+      avgRating DESC 
+    LIMIT 5
+    `,
+    [categoryID],
+    (error, results) => {
+      if (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Database error", error });
+      }
+      res.status(200).json(results);
+      console.log("hi");
+      }
+    );
+  });
+
+app.listen(3300, () =>{
     console.log("Server started on Port 3300");
 })

@@ -6,6 +6,7 @@ import './App.css';
 import Register from './Components/Register'; //Register
 import Login from './Components/Login'; //Login
 import Start from './Components/Start'; //Start Page
+import TopListings from './Components/TopListings'; //Top listings
 
 function App() {
   const [count, setCount] = useState(0);
@@ -38,6 +39,7 @@ function App() {
         <Route path="/" element={<Start />} />
         <Route path="/Register" element={<Register />} />
         <Route path="/Login" element={<Login />} />
+        <Route path="/TopListings" element={<TopListings />} />
       </Routes>
     </Router>
   );

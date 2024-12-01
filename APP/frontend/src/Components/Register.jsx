@@ -21,7 +21,7 @@ const Register = () => {
     };
 
     try {
-      const response = await fetch('http://localhost:3000/register', {
+      const response = await fetch('http://localhost:3300/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -80,7 +80,6 @@ const Register = () => {
             onChange={(e) => setRoleReg(e.target.value)}
             required
           >
-            <option value="">Select Role</option>
             <option value="Buyer">Buyer</option>
             <option value="Seller">Seller</option>
           </select>
