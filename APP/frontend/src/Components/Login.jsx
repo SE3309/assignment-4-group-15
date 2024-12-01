@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const Login = () => {
+const Login = ({ setCurrentUsername, setIsLoggedIn }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
@@ -24,6 +24,8 @@ const Login = () => {
       if (response.ok) {
         alert('Login Successful!');
         console.log('User logged in successfully.');
+        setCurrentUsername(username);
+        setIsLoggedIn(true);
         setUsername('');
         setPassword('');
       } else {

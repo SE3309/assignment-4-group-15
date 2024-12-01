@@ -11,7 +11,7 @@ const db = mysql.createConnection({
     host: '127.0.0.1', //Or localhost
     port: 3306,
     user: 'root',
-    password: '46319432Harry', //CHANGE
+    password: '6x7VuxRQCAlF9DZ4', //CHANGE
     database: 'marketplace' //CHANGE
 })
 db.connect((e) => {
@@ -105,6 +105,38 @@ app.post('/login', (req, res) => {
       }
     );
   });
+
+  // get monthly revenue for a seller
+app.post('/revenue', (req, res) => {
+  const { sellerID, month, year } = req.body;
+
+  if (!sellerID || !month || !year) {
+    return res.status(400).json({ error: 'Seller ID, month, and year are required' });
+  }
+
+  db.query(`
+    SELECT
+      SUM(ol.quantity * l.price) AS revenue
+    FROM
+      Orders o
+    JOIN
+      OrderListing ol ON o.orderID = ol.orderID
+    JOIN
+      Listing l ON ol.listingID = l.listingID
+    WHERE
+      l.seller = ?
+      AND MONTH(o.date) = ?
+      AND YEAR(o.date) = ?;
+  `, [sellerID, month, year], (err, results) => {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ error: 'Query failed' });
+      }
+
+      const revenue = results[0].revenue || 0;
+      return res.json({ revenue });
+  });
+})
 
 app.listen(3300, () =>{
     console.log("Server started on Port 3300");
