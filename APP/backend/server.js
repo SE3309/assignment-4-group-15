@@ -11,8 +11,8 @@ const db = mysql.createConnection({
     host: '127.0.0.1', //Or localhost
     port: 3306,
     user: 'root',
-    password: 'ps', //CHANGE
-    database: 'mydatabase' //CHANGE
+    password: 'Haszm2004!', //CHANGE
+    database: 'marketplacee' //CHANGE
 })
 db.connect((e) => {
     if (e) {
@@ -233,6 +233,39 @@ app.get('/listings', (req, res) => {
       if (err) {
           console.error("Error executing query:", err);
           return res.status(500).json({ error: "An error occurred while fetching listings." });
+      }
+
+      res.status(200).json(results);
+  });
+});
+
+//endpoint to view items with high ratings
+app.get('/listings/high-rated', (req, res) => {
+  const { page = 1 } = req.query; // Default to page 1 if not provided
+  const limit = 10; // 10 listings per page
+  const offset = (page - 1) * limit;
+
+  const query = `
+      SELECT 
+          l.listingID, l.seller, l.categoryID, l.price, l.description, l.images, 
+          AVG(r.rating) AS avgRating 
+      FROM 
+          Listing l
+      JOIN 
+          Review r ON l.listingID = r.listingID
+      GROUP BY 
+          l.listingID
+      HAVING 
+          avgRating > 3
+      ORDER BY 
+          avgRating DESC
+      LIMIT ? OFFSET ?;
+  `;
+
+  db.query(query, [limit, offset], (err, results) => {
+      if (err) {
+          console.error('Database error:', err);
+          return res.status(500).json({ error: 'Database query failed' });
       }
 
       res.status(200).json(results);

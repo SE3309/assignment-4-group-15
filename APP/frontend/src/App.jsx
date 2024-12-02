@@ -10,6 +10,7 @@ import TopListings from './Components/TopListings'; //Top listings
 import Revenue from './Components/Revenue';
 import CreateListing from './Components/CreateListing';
 import SearchPriceRange from './Components/SearchPriceRange';
+import HighRatedListings from "./Components/HighRatedListings";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -26,24 +27,32 @@ function App() {
 
   return (
     <Router>
-      {
       <div className="top">
         <span>{isLoggedIn ? `Hello, ${currentUsername}` : 'Not Logged In'}</span>
-        {isLoggedIn && (
-          <div>
-            <Link to="/revenue">
-              <button>View My Monthly Revenue</button>
-            </Link>
-            <button onClick={() => {
-              localStorage.removeItem('currentUsername');
-
-              setIsLoggedIn(false);
-              setCurrentUsername('');
-            }}>Log Out</button>
-          </div>
-        )}
+        <div>
+          {/* Buttons visible only to logged-in users */}
+          {isLoggedIn && (
+            <>
+              <Link to="/Revenue">
+                <button>View My Monthly Revenue</button>
+              </Link>
+              <Link to="/HighRatedListings">
+                <button>View Top Items</button>
+              </Link>
+              <button
+                onClick={() => {
+                  localStorage.removeItem('currentUsername');
+                  setIsLoggedIn(false);
+                  setCurrentUsername('');
+                }}
+              >
+                Log Out
+              </button>
+            </>
+          )}
+        </div>
       </div>
-     }
+
 
       <Routes>
         <Route path="/" element={<Start />} />
@@ -53,6 +62,7 @@ function App() {
         <Route path="/Revenue" element={<Revenue isLoggedIn={isLoggedIn} currentUsername={currentUsername} />} />
         <Route path='/CreateListing' element={<CreateListing />} />
         <Route path='/SearchPriceRange' element={<SearchPriceRange />} />
+        <Route path="/HighRatedListings" element={<HighRatedListings />} />
       </Routes>
     </Router>
   );
