@@ -47,6 +47,15 @@ function App() {
               <Link to="/Orders">
                 <button>View Orders</button>
               </Link>
+              <Link to="/TopListings">
+              <button>Top Listings</button>
+            </Link>
+            <Link to="/SearchPriceRange">
+              <button>Search Price Range</button>
+            </Link>
+            <Link to="/CreateListing">
+              <button>Create Listing</button>
+            </Link>
               <button
                 onClick={() => {
                   localStorage.removeItem('currentUsername');
