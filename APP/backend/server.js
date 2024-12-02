@@ -276,3 +276,128 @@ app.get('/listings/high-rated', (req, res) => {
 app.listen(3300, () =>{
     console.log("Server started on Port 3300");
 })
+
+// Backend code
+app.post('/get-address-id', (req, res) => {
+  const { address } = req.body;
+
+  // Check if the address exists in the database
+  db.query(
+    "SELECT id FROM Address WHERE streetAddress = ?",
+    [address],
+    (error, result) => {
+      if (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Error getting address ID", error });
+      }
+
+      if (result.length === 0) {
+        // If the address doesn't exist, create a new one
+        db.query(
+          "INSERT INTO Address (streetAddress) VALUES (?)",
+          [address],
+          (error, result) => {
+            if (error) {
+              console.error(error);
+              return res.status(500).json({ message: "Error creating address", error });
+            }
+
+            const addressID = result.insertId;
+            res.status(200).json({ message: "Address ID retrieved successfully", addressID });
+          }
+        );
+      } else {
+        const addressID = result[0].id;
+        res.status(200).json({ message: "Address ID retrieved successfully", addressID });
+      }
+    }
+  );
+});
+
+// Create an order
+app.post('/create-order', (req, res) => {
+  const { buyer, listings, paymentMethod, shippingDetails } = req.body;
+
+  // Start a transaction
+  db.beginTransaction((err) => {
+    if (err) return res.status(500).json({ message: "Transaction error", err });
+
+    // Insert into Orders table
+    db.query(
+      "INSERT INTO Orders (buyer, date) VALUES (?, NOW())",
+      [buyer],
+      (error, result) => {
+        if (error) {
+          return db.rollback(() => {
+            console.log(error);
+            res.status(500).json({ message: "Database error", error });
+          });
+        }
+
+        const orderID = result.insertId;
+
+        // Insert into OrderListing table
+        const orderListingQueries = listings.map(listing => {
+          return new Promise((resolve, reject) => {
+            db.query(
+              "INSERT INTO OrderListing (orderID, listingID, quantity) VALUES (?, ?, ?)",
+              [orderID, listing.listingID, listing.quantity],
+              (error) => {
+                if (error) return reject(error);
+                resolve();
+              }
+            );
+          });
+        });
+
+        Promise.all(orderListingQueries)
+          .then(() => {
+            // Insert into Payment table
+            db.query(
+              "INSERT INTO Payment (orderID, paymentMethod, status) VALUES (?, ?, ?)",
+              [orderID, paymentMethod, 'completed'],
+              (error) => {
+                if (error) {
+                  return db.rollback(() => {
+                    console.log(error);
+                    res.status(500).json({ message: "Database error", error });
+                  });
+                }
+
+                // Insert into Shipping table
+                db.query(
+                  "INSERT INTO Shipping (orderID, origin, destination, status) VALUES (?, ?, ?, ?)",
+                  [orderID, shippingDetails.origin, shippingDetails.destination, 'pending'],
+                  (error) => {
+                    if (error) {
+                      return db.rollback(() => {
+                        console.log(error);
+                        res.status(500).json({ message: "Database error", error });
+                      });
+                    }
+
+                    // Commit the transaction
+                    db.commit((err) => {
+                      if (err) {
+                        return db.rollback(() => {
+                          console.log(err);
+                          res.status(500).json({ message: "Transaction commit error", err });
+                        });
+                      }
+                      res.status(201).json({ message: "Order created successfully", orderID });
+                    });
+                  }
+                );
+              }
+            );
+          })
+          .catch(error => {
+            db.rollback(() => {
+              console.log(error);
+              res.status(500).json({ message: "Database error", error });
+            });
+          });
+      }
+    );
+  });
+});
