@@ -12,6 +12,7 @@ import CreateListing from './Components/CreateListing';
 import SearchPriceRange from './Components/SearchPriceRange';
 import HighRatedListings from "./Components/HighRatedListings";
 import CreateOrder from './Components/CreateOrder';
+import Orders from './Components/Orders';
 
 function App() {
   const [count, setCount] = useState(0);
@@ -35,14 +36,17 @@ function App() {
           {isLoggedIn && (
             <>
               <Link to="/Revenue">
-                <button>View My Monthly Revenue</button>
+                <button>View Revenue</button>
               </Link>
               <Link to="/HighRatedListings">
                 <button>View Top Items</button>
               </Link>
               <Link to="/CreateOrder">
-              <button>Create Order</button>
-            </Link>
+                <button>Create Order</button>
+              </Link>
+              <Link to="/Orders">
+                <button>View Orders</button>
+              </Link>
               <button
                 onClick={() => {
                   localStorage.removeItem('currentUsername');
@@ -68,6 +72,7 @@ function App() {
         <Route path='/SearchPriceRange' element={<SearchPriceRange />} />
         <Route path="/HighRatedListings" element={<HighRatedListings />} />
         <Route path="/CreateOrder" element={<CreateOrder />} />
+        <Route path="/Orders" element={<Orders currentUsername={currentUsername} />} />
       </Routes>
     </Router>
   );

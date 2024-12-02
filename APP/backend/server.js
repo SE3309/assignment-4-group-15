@@ -11,8 +11,8 @@ const db = mysql.createConnection({
     host: '127.0.0.1', //Or localhost
     port: 3306,
     user: 'root',
-    password: 'Haszm2004!', //CHANGE
-    database: 'marketplacee' //CHANGE
+    password: '6x7VuxRQCAlF9DZ4', //CHANGE
+    database: 'marketplace' //CHANGE
 })
 db.connect((e) => {
     if (e) {
@@ -279,12 +279,12 @@ app.listen(3300, () =>{
 
 // Backend code
 app.post('/get-address-id', (req, res) => {
-  const { address } = req.body;
+  const { streetAddress, city, state, postalCode, country } = req.body;
 
   // Check if the address exists in the database
   db.query(
-    "SELECT id FROM Address WHERE streetAddress = ?",
-    [address],
+    "SELECT addressID FROM Address WHERE streetAddress = ? AND city = ? AND state = ? AND postalCode = ? AND country = ?",
+    [streetAddress, city, state, postalCode, country],
     (error, result) => {
       if (error) {
         console.error(error);
@@ -294,8 +294,8 @@ app.post('/get-address-id', (req, res) => {
       if (result.length === 0) {
         // If the address doesn't exist, create a new one
         db.query(
-          "INSERT INTO Address (streetAddress) VALUES (?)",
-          [address],
+          "INSERT INTO Address (streetAddress, city, state, postalCode, country) VALUES (?, ?, ?, ?, ?)",
+          [streetAddress, city, state, postalCode, country],
           (error, result) => {
             if (error) {
               console.error(error);
@@ -355,7 +355,7 @@ app.post('/create-order', (req, res) => {
             // Insert into Payment table
             db.query(
               "INSERT INTO Payment (orderID, paymentMethod, status) VALUES (?, ?, ?)",
-              [orderID, paymentMethod, 'completed'],
+              [orderID, paymentMethod.paymentMethod, 'completed'],
               (error) => {
                 if (error) {
                   return db.rollback(() => {
@@ -399,5 +399,72 @@ app.post('/create-order', (req, res) => {
           });
       }
     );
+  });
+});
+
+app.get('/orders', (req, res) => {
+  const { buyer } = req.query; 
+
+  if (!buyer) {
+      return res.status(400).json({ message: 'Buyer is required' });
+  }
+
+  const query = `
+      SELECT 
+          o.orderID, 
+          o.date, 
+          p.paymentMethod, 
+          p.status AS paymentStatus, 
+          s.origin, 
+          s.destination, 
+          s.status AS shippingStatus, 
+          s.arrivalDate, 
+          s.company,
+          ol.listingID, 
+          ol.quantity
+      FROM Orders o
+      LEFT JOIN OrderListing ol ON o.orderID = ol.orderID
+      LEFT JOIN Payment p ON o.orderID = p.orderID
+      LEFT JOIN Shipping s ON o.orderID = s.orderID
+      WHERE o.buyer = ?
+      ORDER BY o.date DESC
+  `;
+
+  db.query(query, [buyer], (err, results) => {
+      if (err) {
+          console.error('Error fetching orders:', err);
+          return res.status(500).json({ message: 'Internal server error' });
+      }
+
+      const orders = results.reduce((acc, row) => {
+          const existingOrder = acc.find(order => order.orderID === row.orderID);
+          if (existingOrder) {
+              existingOrder.listings.push({
+                  listingID: row.listingID,
+                  quantity: row.quantity
+              });
+          } else {
+              acc.push({
+                  orderID: row.orderID,
+                  date: row.date,
+                  paymentMethod: row.paymentMethod,
+                  paymentStatus: row.paymentStatus,
+                  shippingDetails: {
+                      origin: row.origin,
+                      destination: row.destination,
+                      status: row.shippingStatus,
+                      arrivalDate: row.arrivalDate,
+                      company: row.company
+                  },
+                  listings: [{
+                      listingID: row.listingID,
+                      quantity: row.quantity
+                  }]
+              });
+          }
+          return acc;
+      }, []);
+
+      res.json(orders);
   });
 });
