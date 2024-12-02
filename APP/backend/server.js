@@ -11,7 +11,7 @@ const db = mysql.createConnection({
     host: '127.0.0.1', //Or localhost
     port: 3306,
     user: 'root',
-    password: '1@Kirill360', //CHANGE
+    password: 'ps', //CHANGE
     database: 'mydatabase' //CHANGE
 })
 db.connect((e) => {
