@@ -57,6 +57,33 @@ button:focus-visible {
   display: flex;
   justify-content: space-around;
 }
+.top {
+  position: fixed;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  top: 0;
+  left: 0;
+  height: 60px;
+  width: 100vw;
+  box-sizing: border-box;
+  padding: 0 20px;
+  background-color: #333;
+  color: white;
+  font-size: 16px;
+  z-index: 1000;
+}
+
+.chart-container {
+  width: 80vw;
+  height: 50vh;
+  margin: 0 auto;
+}
+
+canvas {
+  width: 80vw !important;
+  height: 50vh !important;
+}
 
 @media (prefers-color-scheme: light) {
   :root {
