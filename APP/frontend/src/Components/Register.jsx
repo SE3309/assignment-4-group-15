@@ -80,8 +80,9 @@ const Register = () => {
             onChange={(e) => setRoleReg(e.target.value)}
             required
           >
-            <option value="Buyer">Buyer</option>
-            <option value="Seller">Seller</option>
+            <option value="">Choose Role</option>
+            <option value="Admin">Admin</option>
+            <option value="User">User</option>
           </select>
           <label>Phone Number</label>
           <input

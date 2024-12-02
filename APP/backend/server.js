@@ -11,8 +11,8 @@ const db = mysql.createConnection({
     host: '127.0.0.1', //Or localhost
     port: 3306,
     user: 'root',
-    password: '6x7VuxRQCAlF9DZ4', //CHANGE
-    database: 'marketplace' //CHANGE
+    password: 'ps', //CHANGE
+    database: 'mydatabase' //CHANGE
 })
 db.connect((e) => {
     if (e) {
@@ -137,6 +137,108 @@ app.post('/revenue', (req, res) => {
       return res.json({ revenue });
   });
 })
+
+
+app.get('/categories', (req, res) => {
+  db.query('SELECT categoryID, name FROM Category', (error, results) => {
+    if (error) {
+      console.error('Database error:', error);
+      return res.status(500).json({ message: 'Database error', error });
+    }
+    res.status(200).json(results);
+  });
+});
+
+
+app.post('/addresses', async (req, res) => {
+  const { streetAddress, city, state, postalCode, country } = req.body;
+
+  // Validate required fields
+  if (!streetAddress || !city || !country) {
+      return res.status(400).json({ message: 'streetAddress, city, and country are required.' });
+  }
+
+  try {
+      const dbPromise = db.promise();
+
+      const [rows] = await dbPromise.query(
+          `
+          SELECT addressID 
+          FROM Address 
+          WHERE streetAddress = ? AND city = ? AND state <=> ? AND postalCode <=> ? AND country = ?
+          `,
+          [streetAddress, city, state || null, postalCode || null, country]
+      );
+
+      if (rows.length > 0) {
+          return res.status(200).json({ addressID: rows[0].addressID });
+      }
+
+      const [result] = await dbPromise.query(
+          `
+          INSERT INTO Address (streetAddress, city, state, postalCode, country)
+          VALUES (?, ?, ?, ?, ?)
+          `,
+          [streetAddress, city, state || null, postalCode || null, country]
+      );
+
+      // Return the new address ID
+      res.status(201).json({ addressID: result.insertId });
+  } catch (error) {
+      console.error('Error handling /addresses request:', error);
+      res.status(500).json({ message: 'Internal server error', error });
+  }
+});
+
+
+  // Add a new listing
+app.post('/add-listing', (req, res) => {
+  const { seller, categoryID, price, description, addressID, images } = req.body;
+
+  if (!seller || !categoryID || !price || !description) {
+      return res.status(400).json({ message: "Required fields are missing or invalid." });
+  }
+
+  if (typeof price !== 'number' || price <= 0) {
+      return res.status(400).json({ message: "Price must be a positive number." });
+  }
+
+  db.query(
+      `INSERT INTO Listing (seller, categoryID, price, description, addressID, images) 
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [seller, categoryID, price, description, addressID || null, images || null],
+      (error, result) => {
+          if (error) {
+              console.error("Database error:", error);
+              return res.status(500).json({ message: "Database error", error });
+          }
+          res.status(201).json({ message: "Listing added successfully", listingID: result.insertId });
+      }
+  );
+});
+
+//Endpoint to search by price range
+app.get('/listings', (req, res) => {
+  const { minPrice, maxPrice } = req.query;
+
+  // Validate input
+  if (!minPrice || !maxPrice || isNaN(minPrice) || isNaN(maxPrice)) {
+      return res.status(400).json({ error: "Valid minPrice and maxPrice are required." });
+  }
+
+  const query = `SELECT listingID, seller, price, description FROM Listing WHERE price BETWEEN ? AND ?`;
+  const params = [parseFloat(minPrice), parseFloat(maxPrice)];
+
+  db.query(query, params, (err, results) => {
+      if (err) {
+          console.error("Error executing query:", err);
+          return res.status(500).json({ error: "An error occurred while fetching listings." });
+      }
+
+      res.status(200).json(results);
+  });
+});
+
 
 app.listen(3300, () =>{
     console.log("Server started on Port 3300");

@@ -27,6 +27,7 @@ const Login = ({ setCurrentUsername, setIsLoggedIn }) => {
         localStorage.setItem('currentUsername', username);
         setCurrentUsername(username);
         setIsLoggedIn(true);
+        localStorage.setItem('loginUserID', formData.username);
         setUsername('');
         setPassword('');
       } else {
