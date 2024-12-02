@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from "react-router-dom";
 
 const Register = () => {
   const [usernameReg, setUsernameReg] = useState('');
@@ -106,6 +107,7 @@ const Register = () => {
           <button type="submit">Submit</button>
         </form>
       </div>
+    <div><Link to="/Login">Made an account? Click here to login</Link></div>
     </div>
   );
 };
