@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import reactLogo from './assets/react.svg';
 import viteLogo from '/vite.svg';
@@ -14,15 +14,31 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUsername, setCurrentUsername] = useState('');
 
+  useEffect(() => {
+    const username = localStorage.getItem('currentUsername');
+    if (username && username !== '') {
+      setCurrentUsername(username);
+      setIsLoggedIn(true);
+    }
+  }, []);
+
   return (
     <Router>
       {
       <div className="top">
         <span>{isLoggedIn ? `Hello, ${currentUsername}` : 'Not Logged In'}</span>
         {isLoggedIn && (
-          <Link to="/revenue">
-            <button>View My Monthly Revenue</button>
-          </Link>
+          <div>
+            <Link to="/revenue">
+              <button>View My Monthly Revenue</button>
+            </Link>
+            <button onClick={() => {
+              localStorage.removeItem('currentUsername');
+
+              setIsLoggedIn(false);
+              setCurrentUsername('');
+            }}>Log Out</button>
+          </div>
         )}
       </div>
       /* <div>

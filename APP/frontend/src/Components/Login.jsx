@@ -24,6 +24,7 @@ const Login = ({ setCurrentUsername, setIsLoggedIn }) => {
       if (response.ok) {
         alert('Login Successful!');
         console.log('User logged in successfully.');
+        localStorage.setItem('currentUsername', username);
         setCurrentUsername(username);
         setIsLoggedIn(true);
         setUsername('');
