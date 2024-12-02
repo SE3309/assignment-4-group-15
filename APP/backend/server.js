@@ -11,7 +11,7 @@ const db = mysql.createConnection({
     host: '127.0.0.1', //Or localhost
     port: 3306,
     user: 'root',
-    password: 'ps', //CHANGE
+    password: '1@Kirill360', //CHANGE
     database: 'mydatabase' //CHANGE
 })
 db.connect((e) => {
@@ -216,6 +216,29 @@ app.post('/add-listing', (req, res) => {
       }
   );
 });
+
+//Endpoint to search by price range
+app.get('/listings', (req, res) => {
+  const { minPrice, maxPrice } = req.query;
+
+  // Validate input
+  if (!minPrice || !maxPrice || isNaN(minPrice) || isNaN(maxPrice)) {
+      return res.status(400).json({ error: "Valid minPrice and maxPrice are required." });
+  }
+
+  const query = `SELECT listingID, seller, price, description FROM Listing WHERE price BETWEEN ? AND ?`;
+  const params = [parseFloat(minPrice), parseFloat(maxPrice)];
+
+  db.query(query, params, (err, results) => {
+      if (err) {
+          console.error("Error executing query:", err);
+          return res.status(500).json({ error: "An error occurred while fetching listings." });
+      }
+
+      res.status(200).json(results);
+  });
+});
+
 
 app.listen(3300, () =>{
     console.log("Server started on Port 3300");

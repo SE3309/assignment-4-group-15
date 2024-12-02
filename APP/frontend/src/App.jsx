@@ -9,6 +9,7 @@ import Start from './Components/Start'; //Start Page
 import TopListings from './Components/TopListings'; //Top listings
 import Revenue from './Components/Revenue';
 import CreateListing from './Components/CreateListing';
+import SearchPriceRange from './Components/SearchPriceRange';
 
 function App() {
   const [count, setCount] = useState(0);
@@ -35,6 +36,7 @@ function App() {
         <Route path="/TopListings" element={<TopListings />} />
         <Route path="/Revenue" element={<Revenue isLoggedIn={isLoggedIn} currentUsername={currentUsername} />} />
         <Route path='/CreateListing' element={<CreateListing />} />
+        <Route path='/SearchPriceRange' element={<SearchPriceRange />} />
       </Routes>
     </Router>
   );
