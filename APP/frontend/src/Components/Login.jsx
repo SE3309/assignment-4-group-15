@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate, Link } from "react-router-dom";
 
 const Login = ({ setCurrentUsername, setIsLoggedIn }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,6 +36,7 @@ const Login = ({ setCurrentUsername, setIsLoggedIn }) => {
         const errorData = await response.json();
         alert(`Login failed: ${errorData.message}`);
       }
+      navigate('/');
     } catch (error) {
       console.log(error);
       alert('Error');
